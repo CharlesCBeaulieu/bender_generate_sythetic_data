@@ -12,7 +12,7 @@ from pathlib import Path
 from dataset import Dataset
 
 
-def process_single_part(part_dataset, part_identifier):
+def process_single_part(stl, output):
     """
     Process a single part (by its identifier) from the dataset.
     Looks up the STL file corresponding to the part and then generates
@@ -20,18 +20,13 @@ def process_single_part(part_dataset, part_identifier):
     """
     # stl_path = str(part_dataset.get_stl_path(part_identifier))
 
-    for stl_file in os.listdir(stl_folder):
-        if stl_file.endswith(".stl"):
-            stl_folder = os.path.join(stl_folder, stl_file)
-
-    print(f"Processing part {part_identifier} using STL file: {stl_folder}")
     generate_point_cloud(
-        stl_path=stl_folder,
+        stl_path=str(stl),
         model_location=(0, 0, 0),  # Position the model at the origin.
         model_scale=(0.001, 0.001, 0.001),  # Scale the model appropriately.
         num_cameras=10,  # Number of cameras to generate views.
-        part_number=part_identifier,  # Use the part identifier.
-        output_folder=output_folder,  # Output folder for generated data.
+        distance_to_camera=6000,  # Distance from the camera to the model.
+        output_folder=output,  # Output folder for generated data.
     )
 
 
@@ -43,19 +38,18 @@ if __name__ == "__main__":
     else:
         argv = []
 
-    if len(argv) < 1:
-        print("Usage: blender --background --python generate_data_from_views.py -- <part_id>")
+    if len(argv) < 2:
+        print(
+            "Usage: blender --background --python generate_data_from_views.py -- <stl_file_path> <output_folder>"
+        )
         sys.exit(1)
 
-    # Get the part identifier from the command-line.
-    part_id = argv[0]
+    # Get the arguments from the command-line.
+    stl_file_path = Path(argv[0]).expanduser()
+    output_folder = Path(argv[1]).expanduser()
 
-    # Define and load the dataset.
-    dataset_path = Path(
-        "~/Documents/LavalUniversity/Maitrise/data/DataSBI/structured_dataset"
-    ).expanduser()
-    dataset = Dataset(dataset_path)
-    dataset.load_metadata()
+    # Ensure the output folder exists
+    output_folder.mkdir(parents=True, exist_ok=True)
 
-    # Process the single part.
-    process_single_part(dataset, part_id)
+    # Process the single part
+    process_single_part(stl_file_path, output_folder)

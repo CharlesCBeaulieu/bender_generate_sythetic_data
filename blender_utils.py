@@ -313,7 +313,8 @@ def generate_point_cloud(
     model_location,
     model_scale,
     num_cameras,  # Number of cameras to place on the sphere
-    part_number,
+    distance_to_camera,
+    output_folder,
 ):
     """
     Generate a point cloud from a given STL model.
@@ -322,7 +323,9 @@ def generate_point_cloud(
     """
     start_clip = 0.1  # Near clipping plane (meters)
     end_clip = 10  # Far clipping plane (meters)
-    margin = 5  # Extra multiplier to frame the object
+    # margin = 5  # Extra multiplier to frame the object
+    part_number = stl_path.split("/")[-1].split(".")[0]
+    print(f"Processing part {part_number} using STL file: {stl_path}")
 
     # Clear the current scene
     clear_scene()
@@ -357,9 +360,9 @@ def generate_point_cloud(
     bpy.data.objects.remove(temp_cam, do_unlink=True)
 
     # Compute distance required to frame the object.
-    distance = (max_dimension / 2) / tan(fov / 2) * margin
-    print(f"Distance to object center: {distance} meters")
-    distance = 6000  # Set a fixed distance for testing
+    # distance = (max_dimension / 2) / tan(fov / 2) * margin
+    # print(f"Distance to object center: {distance} meters")
+    distance = distance_to_camera  # Set a fixed distance for testing
 
     # Get camera positions on a sphere (in meters)
     cam_positions = get_camera_positions_on_sphere(obj, num_cameras, distance)
@@ -425,8 +428,8 @@ def generate_point_cloud(
         print(
             f"Warning: No valid depth data found for part {part_number}. Skipping point cloud generation."
         )
-        os.makedirs("generated/blend/bug", exist_ok=True)
-        blend_filename = f"generated/blend/bug/part{part_number}.blend"
+        os.makedirs(output_folder, exist_ok=True)
+        blend_filename = os.path.join(output_folder, f"{part_number}.blend")
         bpy.ops.wm.save_as_mainfile(filepath=blend_filename)
         return
 
@@ -449,20 +452,24 @@ def generate_point_cloud(
     dm_image_median = open3d.geometry.Image((median_depth_map * 255).astype(np.uint8))
 
     # Ensure output directories exist
-    os.makedirs("generated3/pcd_best", exist_ok=True)
-    os.makedirs("generated3/pcd_median", exist_ok=True)
-    os.makedirs("generated3/depthmap_best", exist_ok=True)
-    os.makedirs("generated3/depthmap_median", exist_ok=True)
-    os.makedirs("generated3/blend", exist_ok=True)
+    pcd_best_folder = os.path.join(output_folder, "pcd_best")
+    pcd_median_folder = os.path.join(output_folder, "pcd_median")
+    dm_best_folder = os.path.join(output_folder, "depthmap_best")
+    dm_median_folder = os.path.join(output_folder, "depthmap_median")
+    blend_folder = os.path.join(output_folder, "blend")
+
+    os.makedirs(pcd_best_folder, exist_ok=True)
+    os.makedirs(pcd_median_folder, exist_ok=True)
+    os.makedirs(dm_best_folder, exist_ok=True)
+    os.makedirs(dm_median_folder, exist_ok=True)
+    os.makedirs(blend_folder, exist_ok=True)
 
     # Define filenames
-    pcd_filename_best = f"generated3/pcd_best/{part_number}_{best_view_index}.ply"
-    dm_filename_best = f"generated3/depthmap_best/{part_number}_{best_view_index}.png"
-
-    pcd_filename_median = f"generated3/pcd_median/{part_number}_{median_view_index}.ply"
-    dm_filename_median = f"generated3/depthmap_median/{part_number}_{median_view_index}.png"
-
-    blend_filename = f"generated3/blend/{part_number}.blend"
+    pcd_filename_best = os.path.join(pcd_best_folder, f"{part_number}_{best_view_index}.ply")
+    dm_filename_best = os.path.join(dm_best_folder, f"{part_number}_{best_view_index}.png")
+    pcd_filename_median = os.path.join(pcd_median_folder, f"{part_number}_{median_view_index}.ply")
+    dm_filename_median = os.path.join(dm_median_folder, f"{part_number}_{median_view_index}.png")
+    blend_filename = os.path.join(blend_folder, f"{part_number}.blend")
 
     # Save best view files
     open3d.io.write_point_cloud(pcd_filename_best, pcd_best)
