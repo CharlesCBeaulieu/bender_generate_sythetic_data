@@ -1,31 +1,42 @@
+import os
 import subprocess
 from pathlib import Path
-from dataset import Dataset
-import os
+from tqdm import tqdm
+
+# ---------------------------------------------------------------
+# Confgiguration
+# ---------------------------------------------------------------
 
 # Activate your conda environment paths (if needed)
 conda_python_path = "/Users/charlesbeaulieu/anaconda3/envs/GIF-7005/bin/python"
-dataset_path = Path("data/stuctured_dataset").expanduser()  # Change this to your dataset path
+dataset_path = Path("data/stuctured_dataset").expanduser()
 
-# Load dataset
-ds = Dataset(dataset_path)
-ds.load_metadata()
 stl_folder = "data/structured_dataset/STL"
-
-parts = [str(pn) for pn, _ in ds.iterate_parts()]
-total_parts = len(parts)
-
+output_folder = "generated_4metres"
 # Blender executable path
 blender_exec = "/Applications/Blender.app/Contents/MacOS/Blender"
-blender_script = (
-    "blend_stl_to_sythetic_scan.py"  # Make sure to provide full path if not in current directory
-)
+blender_script = "blend_stl_to_sythetic_scan.py"
 
-# for idx, part in enumerate(parts, start=1):
-#     print(f"Processing part {part} ({idx} of {total_parts})...")
-for stl_file in os.listdir(stl_folder):
 
-    # Run Blender command
-    subprocess.run(
-        [blender_exec, "--background", "--python", blender_script, "--", part], check=True
-    )
+# ---------------------------------------------------------------
+# Processing
+# ---------------------------------------------------------------
+# This part of the script just iterates over the STL files in the folder
+# and runs the Blender script for each file to avoid overloading the memory
+# with blender
+for stl_file in tqdm(os.listdir(stl_folder), desc="Processing STL files", unit="file"):
+    if stl_file.endswith(".stl"):
+        stl_path = os.path.join(stl_folder, stl_file)
+
+        subprocess.run(
+            [
+                blender_exec,
+                "--background",
+                "--python",
+                blender_script,
+                "--",
+                stl_path,
+                output_folder,
+            ],
+            check=True,
+        )
