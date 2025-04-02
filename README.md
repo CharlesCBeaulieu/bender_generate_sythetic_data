@@ -19,17 +19,24 @@ The pipeline takes STL models, generates multiple synthetic camera views, select
 
 4. **Position Cameras:**  
    Cameras are placed evenly across the sphere's surface to capture various viewpoints of the object.
+   ![Alt text](fig/blend_scene.png)
 
 5. **Generate Depth Maps:**  
    Each camera generates a 1080p depth map.
 
 6. **Best View Selection:**  
    The best view is automatically selected by maximizing the number of non-zero pixels in the depth maps. This simulates human-like optimal scanning angles, ensuring quality synthetic scans.
+   ![Alt text](fig/8176978_dm.png)
 
-7. **Reconstruct Point Cloud:**  
+7. **Noise**
+   Add noise to the depth map to simulate sensor noise.
+
+8. **Reconstruct Point Cloud:**  
    The depth map from the best camera is converted into a 3D point cloud using the camera parameters.
+   ![Alt text](fig/resulting_pcd.png)
 
-8. **Save Results:**  
+
+9.  **Save Results:**  
    The synthetic scans (point clouds and depth maps) are saved to the specified output folder.
 
 ## Usage
@@ -39,7 +46,7 @@ The pipeline takes STL models, generates multiple synthetic camera views, select
 Edit the configuration in the script file:
 
 ```bash
-blend_stl_to_sythetic_scan1.py
+blend_stl_to_sythetic_scan.py
 ```
 
 Specify:
@@ -51,7 +58,7 @@ Specify:
 Run the script:
 
 ```bash
-python blend_generate_synthetic_scan1.py
+python blend_generate_synthetic_scan.py
 ```
 
 Ensure Blender is installed and accessible from the command line.
@@ -62,11 +69,28 @@ Ensure Blender is installed and accessible from the command line.
 - Python environment configured to run Blender scripts
 - STL files prepared in the input folder
 
+## Inputs
+
+The inputs should be named following this convention : ```id_of_the_scan.stl```
+
+```bash
+blender_generate_synthetic_data/
+└── input_folder/
+    ├── 124027.stl         # stl filess 
+    ├── 341934.stl         
+    └── ...                
+```
+
 ## Outputs
 
 Generated results include:
-- **Best View Point Cloud**: `.ply`
-- **Best View Depth Map**: `.png`
 
-Each result clearly indicates the optimal viewing angle for synthetic scanning.
-
+```bash
+blender_generate_synthetic_data/
+└── output/
+    ├── blend/             # Blender scene files (.blend)
+    ├── depthmap_best/     # Depth maps from the best camera views
+    ├── depthmap_median/   # Depth maps from median-quality camera views
+    ├── pcd_best/          # Point clouds from the best camera views
+    └── pcd_median/        # Point clouds from median-quality camera views
+```
