@@ -3,5 +3,8 @@ generated3
 generated_4metres
 generated
 data
+old_code
 *.exr
 *.pyc
+*.ply
+*.stl
