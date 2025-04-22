@@ -1,6 +1,5 @@
-stl_directory: "data/structured_dataset/STL" # Path to the STL files
-output_directory:  "test_sample/ply_output_with_noise_test" # Output directory for the PLY files and the depth maps
-
-number_of_cameras: 10
-radius: 1
-noise : 0.001
+stl_directory: "data/structured_dataset/STL"      # Where your .stl files live
+output_directory: "outputs/ply_with_noise"        # Where to save PLYs & depth maps
+number_of_cameras: 10                             # # of views per model
+radius: 1.0                                       # Camera-sphere radius (meters)
+noise: 0.001                                      # Gaussian noise σ (meters)

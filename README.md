@@ -1,96 +1,50 @@
-# STL to Synthetic Scans
+# Synthetic 3D Point‑Cloud Generation with Helios2 ToF Camera Simulation
 
-This project converts STL files into synthetic 3D scans using Blender. It simulates a scanning process by generating synthetic depth maps and reconstructing point clouds from different camera viewpoints around the STL models.
+This codebase lets you automatically generate noisy depth‑maps and back‑projected point clouds (PLY) from STL models using Blender and Open3D, simulating a Helios2 Time‑of‑Flight camera.
 
-## Overview
+---
 
-The pipeline takes STL models, generates multiple synthetic camera views, selects the best viewpoint automatically, and creates realistic synthetic scans.
-
-## Workflow
-
-1. **Scene Setup in Blender:**  
-   A Blender scene is created automatically.
-
-2. **Insert STL Model:**  
-   The STL file is loaded into the Blender scene.
-
-3. **Generate Sphere Around Object:**  
-   A sphere (fixed or dynamically sized) is generated around the model to position cameras.
-
-4. **Position Cameras:**  
-   Cameras are placed evenly across the sphere's surface to capture various viewpoints of the object.
-   ![Alt text](fig/blend_scene.png)
-
-5. **Generate Depth Maps:**  
-   Each camera generates a 1080p depth map.
-
-6. **Best View Selection:**  
-   The best view is automatically selected by maximizing the number of non-zero pixels in the depth maps. This simulates human-like optimal scanning angles, ensuring quality synthetic scans.
-   ![Alt text](fig/8176978_dm.png)
-
-7. **Noise**
-   Add noise to the depth map to simulate sensor noise.
-
-8. **Reconstruct Point Cloud:**  
-   The depth map from the best camera is converted into a 3D point cloud using the camera parameters.
-   ![Alt text](fig/resulting_pcd.png)
-
-
-9.  **Save Results:**  
-   The synthetic scans (point clouds and depth maps) are saved to the specified output folder.
-
-## Usage
-
-### Step 1: Configuration
-
-Edit the configuration in the script file:
-
-```bash
-blend_stl_to_sythetic_scan.py
+## Repository Contents
+```
+├── bl_helios2_synthetic.py   # Main script
+├── camera_params.py          # Camera Utils       
+└── config1.yaml              # Config
 ```
 
-Specify:
-- Path to the input STL files
-- Output folder for synthetic scans
+## Configuration
 
-### Step 2: Generate Synthetic Scans
+Edit **config1.yaml**, for example:
 
-Run the script:
-
-```bash
-python blend_generate_synthetic_scan.py
+```yaml
+stl_directory:    "data/structured_dataset/STL"
+output_directory: "outputs/ply_with_noise"
+number_of_cameras: 10
+radius:            1.0
+noise:             0.001
 ```
 
-Ensure Blender is installed and accessible from the command line.
+## How to use
 
-## Requirements
+You can simply edit the config file and then run the main script : 
 
-- **Blender** (tested with version 4.2.1 LTS)
-- Python environment configured to run Blender scripts
-- STL files prepared in the input folder
-
-## Inputs
-
-The inputs should be named following this convention : ```id_of_the_scan.stl```
-
-```bash
-blender_generate_synthetic_data/
-└── input_folder/
-    ├── 124027.stl         # stl filess 
-    ├── 341934.stl         
-    └── ...                
+```Python
+python bl_helios2_synthetic.py
 ```
 
-## Outputs
+## Results
 
-Generated results include:
+### Step 1
+Insert the object and place helios camera on the sphere around it.  
+![My PNG image](fig/blend_scene.png)
 
-```bash
-blender_generate_synthetic_data/
-└── output/
-    ├── blend/             # Blender scene files (.blend)
-    ├── depthmap_best/     # Depth maps from the best camera views
-    ├── depthmap_median/   # Depth maps from median-quality camera views
-    ├── pcd_best/          # Point clouds from the best camera views
-    └── pcd_median/        # Point clouds from median-quality camera views
-```
+### Step 2 
+Generate the depth maps from different views ans keep the best one
+![My PNG image](fig/8176978_dm.png)
+
+### Step 3
+Back project the depth maps in 3d space (simulating the capture from a single view)
+![My PNG image](fig/resulting_pcd.png)
+
+## Acknowledgements
+
+- Utilities in `camera_params.py` were taken from [OriginalRepo](https://blender.stackexchange.com/questions/38009/3x4-camera-matrix-from-blender-camera) by [Original Author](https://blender.stackexchange.com/users/3581/daniel), licensed under the MIT License.  Modifications and integration by Charles Beaulieu.

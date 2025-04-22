@@ -1,7 +1,12 @@
 import bpy
 from mathutils import Matrix, Vector
 
-# Taken on :https://blender.stackexchange.com/questions/38009/3x4-camera-matrix-from-blender-camera
+# -----------------------------------------------------------------------------
+# Portions of this code are adapted from
+#   https://blender.stackexchange.com/questions/38009/3x4-camera-matrix-from-blender-camera
+#   (c) 2021 Original Author — MIT License
+# Modifications by Your Name, 2025
+# -----------------------------------------------------------------------------
 
 # ---------------------------------------------------------------
 # 3x4 P matrix from Blender camera
